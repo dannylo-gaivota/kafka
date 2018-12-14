@@ -23,12 +23,12 @@ class KafkaSession {
   /// List of Kafka brokers which are used as initial contact points.
   final Queue<ContactPoint> contactPoints;
 
-  Map<String, Future<Socket>> _sockets = new Map();
+  Map<String, Future<SecureSocket>> _sockets = new Map();
   Map<String, StreamSubscription> _subscriptions = new Map();
   Map<String, List<int>> _buffers = new Map();
   Map<String, int> _sizes = new Map();
   Map<KafkaRequest, Completer> _inflightRequests = new Map();
-  Map<Socket, Future> _flushFutures = new Map();
+  Map<SecureSocket, Future> _flushFutures = new Map();
 
   // Cluster Metadata
   Future<List<Broker>> _brokers;
@@ -245,10 +245,16 @@ class KafkaSession {
   //   defaultHosts.addLast(current);
   // }
 
-  Future<Socket> _getSocket(String host, int port) {
+  Future<SecureSocket> _getSocket(String host, int port) {
+    SecurityContext clientContext = new SecurityContext()
+      ..setTrustedCertificates('client_cert.pem', password: 'test1234')
+      ..setClientAuthorities('ca_cert.pem', password: 'test1234')
+      ..usePrivateKey('client_cert_key.pem', password: 'test1234');
+
     var key = '${host}:${port}';
     if (!_sockets.containsKey(key)) {
-      _sockets[key] = Socket.connect(host, port);
+      _sockets[key] = SecureSocket.connect(host, port,
+          context: clientContext, onBadCertificate: (cert) => true);
       _sockets[key].then((socket) {
         socket.setOption(SocketOption.TCP_NODELAY, true);
         _buffers[key] = new List();

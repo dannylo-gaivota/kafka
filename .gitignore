@@ -6,3 +6,6 @@ packages
 .packages
 notes.md
 coverage/
+ca_cert.pem
+client_cert_key.pem
+client_cert.pem
