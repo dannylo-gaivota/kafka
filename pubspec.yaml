@@ -10,6 +10,7 @@ environment:
 dependencies:
   quiver: '>=2.0.0 <3.0.0'
   logging: "^0.11.1+1"
+  mockito: ^4.0.0
 
 dev_dependencies:
   test: ^1.5.1+1
